@@ -1,4 +1,19 @@
+// PozzaPlan – Supabase Verbindung
+const SUPABASE_URL = "https://supabase.com/dashboard/project/zzryzpjoxxpzfrzzlsvs/settings/api-keys";
+const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7pFL9_R";
 
+(async () => {
+  const { createClient } = await import(
+    "https://esm.sh/@supabase/supabase-js@2"
+  );
+
+  window.supabaseClient = createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  console.log("PozzaPlan: Supabase verbunden!");
+})();
 const app = document.getElementById("app");
 
 const today = new Date();

@@ -1,3 +1,4 @@
+
 const app = document.getElementById("app");
 
 const today = new Date();
@@ -12,9 +13,7 @@ app.innerHTML = `
 <style>
 *{box-sizing:border-box}
 body{
-  margin:0;
-  background:#0b1119;
-  color:#f2f5f9;
+  margin:0;background:#0b1119;color:#f2f5f9;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
 }
 button{font:inherit;cursor:pointer}
@@ -57,162 +56,136 @@ button{font:inherit;cursor:pointer}
 .day.active .day-name{color:white}
 .day.active .day-dot{background:white}
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.quick-btn{background:#0e1823;border:1px solid #263546;color:white;border-radius:14px;padding:15px 8px;text-align:center}
+.quick-btn{background:#0e1823;border:1px solid #263546;color:white;border-radius:14px;padding:15px 8px;text-align:center;width:100%}
 .quick-icon{font-size:22px;margin-bottom:7px}
 .quick-label{font-size:12px;font-weight:700}
 .bottom{display:flex;justify-content:space-around;gap:5px;padding:15px 8px;background:#17212d;border:1px solid #263546;border-radius:17px}
-.bottom-item{text-align:center;font-size:12px;color:#94a3b8}
+.bottom-item{text-align:center;font-size:12px;color:#94a3b8;text-decoration:none;flex:1}
 .bottom-item span{display:block;font-size:20px;margin-bottom:5px}
 .bottom-item.active{color:#fb923c}
 @media(min-width:650px){
-  .stats{grid-template-columns:repeat(4,1fr)}
-  .dashboard{padding:30px}
+.stats{grid-template-columns:repeat(4,1fr)}
+.dashboard{padding:30px}
 }
 </style>
 
 <div class="dashboard">
 
-  <header class="header">
-    <div>
-      <div class="brand">🍕 PozzaPlan</div>
-      <div class="brand-sub">Pizzeria · Teamplanung</div>
-    </div>
-    <div class="avatar">PP</div>
-  </header>
+<header class="header">
+<div>
+<div class="brand">🍕 PozzaPlan</div>
+<div class="brand-sub">Pizzeria · Teamplanung</div>
+</div>
+<div class="avatar">PP</div>
+</header>
 
-  <div class="welcome">
-    <div class="date">${weekday}, ${date}</div>
-    <h1>Willkommen bei PozzaPlan</h1>
-    <p>Hier findest du die aktuelle Übersicht deiner Pizzeria.</p>
-  </div>
+<div class="welcome">
+<div class="date">${weekday}, ${date}</div>
+<h1>Willkommen bei PozzaPlan</h1>
+<p>Hier findest du die aktuelle Übersicht deiner Pizzeria.</p>
+</div>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-label">Heute geplant</div>
-      <div class="stat-number">4</div>
-      <div class="stat-note">Mitarbeiter</div>
-    </div>
+<div class="stats">
+<div class="stat">
+<div class="stat-label">Heute geplant</div>
+<div class="stat-number">4</div>
+<div class="stat-note">Mitarbeiter</div>
+</div>
 
-    <div class="stat">
-      <div class="stat-label">Offene Plätze</div>
-      <div class="stat-number orange">2</div>
-      <div class="stat-note">Noch zu besetzen</div>
-    </div>
+<div class="stat">
+<div class="stat-label">Offene Plätze</div>
+<div class="stat-number orange">2</div>
+<div class="stat-note">Noch zu besetzen</div>
+</div>
 
-    <div class="stat">
-      <div class="stat-label">Diese Woche</div>
-      <div class="stat-number">18</div>
-      <div class="stat-note">Schichteinsätze</div>
-    </div>
+<div class="stat">
+<div class="stat-label">Diese Woche</div>
+<div class="stat-number">18</div>
+<div class="stat-note">Schichteinsätze</div>
+</div>
 
-    <div class="stat">
-      <div class="stat-label">Team</div>
-      <div class="stat-number green">8</div>
-      <div class="stat-note">Mitarbeiter</div>
-    </div>
-  </div>
+<div class="stat">
+<div class="stat-label">Team</div>
+<div class="stat-number green" id="teamCount">0</div>
+<div class="stat-note">Mitarbeiter</div>
+</div>
+</div>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Heutige Schichten</h2>
-      <button class="small-btn">Tagesplan</button>
-    </div>
+<section class="section">
+<div class="section-head">
+<h2>Heutige Schichten</h2>
+<button class="small-btn" onclick="location.href='./plan.html'">Tagesplan</button>
+</div>
 
-    <div class="shift">
-      <div class="shift-head">
-        <div>
-          <div class="shift-name">☀️ Mittagsschicht</div>
-          <div class="shift-time">11:00 – 16:00 Uhr</div>
-        </div>
-        <div class="status status-ok">2 / 2</div>
-      </div>
-      <div class="staff">Besetzung: Mitarbeiter 1 · Mitarbeiter 2</div>
-    </div>
+<div class="shift">
+<div class="shift-head">
+<div>
+<div class="shift-name">☀️ Mittagsschicht</div>
+<div class="shift-time">11:00 – 16:00 Uhr</div>
+</div>
+<div class="status status-ok">2 / 2</div>
+</div>
+<div class="staff">Mittagsschicht</div>
+</div>
 
-    <div class="shift">
-      <div class="shift-head">
-        <div>
-          <div class="shift-name">🌙 Abendschicht</div>
-          <div class="shift-time">17:00 – 23:00 Uhr</div>
-        </div>
-        <div class="status status-open">2 / 4</div>
-      </div>
-      <div class="staff">Besetzung: Mitarbeiter 3 · Mitarbeiter 4</div>
-    </div>
-  </section>
+<div class="shift">
+<div class="shift-head">
+<div>
+<div class="shift-name">🌙 Abendschicht</div>
+<div class="shift-time">17:00 – 23:00 Uhr</div>
+</div>
+<div class="status status-open">2 / 4</div>
+</div>
+<div class="staff">Abendschicht</div>
+</div>
+</section>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Wochenübersicht</h2>
-      <button class="small-btn" id="weekBack">‹</button>
-      <button class="small-btn" id="weekForward">›</button>
-    </div>
-    <div class="week" id="weekView"></div>
-  </section>
+<section class="section">
+<div class="section-head">
+<h2>Wochenübersicht</h2>
+<button class="small-btn" id="weekBack">‹</button>
+<button class="small-btn" id="weekForward">›</button>
+</div>
+<div class="week" id="weekView"></div>
+</section>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Nächste Schichten</h2>
-    </div>
+<section class="section">
+<div class="section-head">
+<h2>Schnellzugriff</h2>
+</div>
 
-    <div class="shift">
-      <div class="shift-head">
-        <div>
-          <div class="shift-name">Samstag · Abendschicht</div>
-          <div class="shift-time">17:00 – 23:00 Uhr</div>
-        </div>
-        <div class="status status-ok">Besetzt</div>
-      </div>
-    </div>
+<div class="quick">
+<button class="quick-btn" onclick="location.href='./plan.html'">
+<div class="quick-icon">📅</div>
+<div class="quick-label">Dienstplan</div>
+</button>
 
-    <div class="shift">
-      <div class="shift-head">
-        <div>
-          <div class="shift-name">Sonntag · Mittagsschicht</div>
-          <div class="shift-time">11:00 – 16:00 Uhr</div>
-        </div>
-        <div class="status status-open">Offen</div>
-      </div>
-    </div>
-  </section>
+<button class="quick-btn" onclick="location.href='./team.html'">
+<div class="quick-icon">👥</div>
+<div class="quick-label">Team</div>
+</button>
 
-  <section class="section">
-    <div class="section-head">
-      <h2>Schnellzugriff</h2>
-    </div>
+<button class="quick-btn" onclick="location.href='./team.html'">
+<div class="quick-icon">🕒</div>
+<div class="quick-label">Team verwalten</div>
+</button>
+</div>
+</section>
 
-    <div class="quick">
-      <button class="quick-btn">
-        <div class="quick-icon">📅</div>
-        <div class="quick-label">Dienstplan</div>
-      </button>
-
-      <button class="quick-btn">
-        <div class="quick-icon">👥</div>
-        <div class="quick-label">Team</div>
-      </button>
-
-      <button class="quick-btn">
-        <div class="quick-icon">🕒</div>
-        <div class="quick-label">Verfügbarkeit</div>
-      </button>
-    </div>
-  </section>
-
-  <div class="bottom">
-    <div class="bottom-item active">
-      <span>⌂</span>Übersicht
-    </div>
-    <div class="bottom-item">
-      <span>▦</span>Plan
-    </div>
-    <div class="bottom-item">
-      <span>♙</span>Team
-    </div>
-    <div class="bottom-item">
-      <span>⚙</span>Einstellungen
-    </div>
-  </div>
+<nav class="bottom">
+<a class="bottom-item active" href="./index.html">
+<span>⌂</span>Übersicht
+</a>
+<a class="bottom-item" href="./plan.html">
+<span>▦</span>Plan
+</a>
+<a class="bottom-item" href="./team.html">
+<span>♙</span>Team
+</a>
+<a class="bottom-item" href="./team.html">
+<span>⚙</span>Einstellungen
+</a>
+</nav>
 
 </div>
 `;
@@ -249,12 +222,19 @@ let weekOffset = 0;
 
 renderWeek();
 
-document.getElementById("weekBack").onclick = ()=>{
+document.getElementById("weekBack").onclick=()=>{
   weekOffset--;
   renderWeek(weekOffset);
 };
 
-document.getElementById("weekForward").onclick = ()=>{
+document.getElementById("weekForward").onclick=()=>{
   weekOffset++;
   renderWeek(weekOffset);
 };
+
+try {
+  const team = JSON.parse(localStorage.getItem("pozzaplan_team") || "[]");
+  document.getElementById("teamCount").textContent = team.length;
+} catch(e) {
+  document.getElementById("teamCount").textContent = "0";
+}

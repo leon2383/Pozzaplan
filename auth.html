@@ -144,9 +144,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   });
 
   if (error) {
-    message.textContent = error.message;
-    return;
-  }
+  message.textContent = "Registrierungsfehler: " + error.message;
+  return;
+}
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")

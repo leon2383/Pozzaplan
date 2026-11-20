@@ -78,8 +78,16 @@ import { createClient } from
 const SUPABASE_URL = "https://supabase.com/dashboard/project/zzryzpjoxxpzfrzzlsvs/sql/8415bd8f-5ddd-40f7-b0f6-1b44a0526b8d";
 const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7pFL9_R";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const message = document.getElementById("message");
+
+let supabase;
+
+try {
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  message.textContent = "Supabase-Client geladen.";
+} catch (err) {
+  message.textContent = "Fehler beim Laden: " + err.message;
+}
 
 window.showLogin = () => {
   document.getElementById("loginForm").style.display = "block";

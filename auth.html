@@ -113,13 +113,23 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   const email = document.getElementById("registerEmail").value.trim();
   const password = document.getElementById("registerPassword").value;
 
-  const { data, error } = await supabase.auth.signUp({
+  let data, error;
+
+try {
+  const result = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { display_name: name }
     }
   });
+
+  data = result.data;
+  error = result.error;
+} catch (err) {
+  message.textContent = "Netzwerkfehler: " + err.message;
+  return;
+}
 
   if (error) {
     message.textContent = error.message;

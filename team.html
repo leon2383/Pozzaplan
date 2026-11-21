@@ -57,6 +57,8 @@ const activeBox = document.getElementById("active");
 const message = document.getElementById("message");
 
 async function loadTeam(){
+  try {
+    message.textContent="Prüfe Anmeldung...";
   const {data:authData} = await supabase.auth.getUser();
 
   if(!authData.user){

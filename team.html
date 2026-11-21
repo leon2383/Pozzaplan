@@ -19,13 +19,15 @@ h1{margin-bottom:5px}
 button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
 .approve{background:#31c48d;color:#071b14}
 .back{background:#253446;color:white;margin-bottom:20px}
-.status{color:#98a6b8;font-size:14px}
+.status{color:#98a6b8;font-size:14px;overflow-wrap:anywhere}
 .empty{color:#98a6b8;padding:10px 0}
 input{width:100%;padding:12px;margin:7px 0 12px;border-radius:10px;border:1px solid #34465a;background:#0b1119;color:white;font:inherit}
 .create{width:100%;background:#31c48d;color:#071b14;margin-top:5px}
+button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
+
 <div class="app">
 <button class="back" onclick="location.href='./index.html'">← Dashboard</button>
 
@@ -39,10 +41,15 @@ input{width:100%;padding:12px;margin:7px 0 12px;border-radius:10px;border:1px so
 <input id="firstName" placeholder="Vorname" required>
 <input id="lastName" placeholder="Nachname" required>
 <input id="newEmail" type="email" placeholder="E-Mail-Adresse" required>
-<input id="newPassword" type="password" placeholder="Temporäres Passwort (mind. 8 Zeichen)" minlength="8" required>
+<input id="newPassword" type="password"
+placeholder="Temporäres Passwort (mind. 8 Zeichen)"
+minlength="8" required>
 
-<button class="create" type="submit">Mitarbeiter erstellen</button>
+<button class="create" id="createButton" type="submit">
+Mitarbeiter erstellen
+</button>
 </form>
+
 <div id="createMessage" class="status"></div>
 </div>
 
@@ -63,7 +70,7 @@ input{width:100%;padding:12px;margin:7px 0 12px;border-radius:10px;border:1px so
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://zzryzpjoxxpzfrzzlsvs.supabase.co";
-const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7pFL9_R";
+const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7PFL9_R";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -72,12 +79,14 @@ const activeBox = document.getElementById("active");
 const message = document.getElementById("message");
 const createMessage = document.getElementById("createMessage");
 const createForm = document.getElementById("createForm");
+const createButton = document.getElementById("createButton");
 
 async function loadTeam() {
   message.textContent = "Prüfe Anmeldung...";
 
   try {
-    const { data: authData, error: authError } = await supabase.auth.getUser();
+    const { data: authData, error: authError } =
+      await supabase.auth.getUser();
 
     if (authError) throw authError;
 
@@ -115,7 +124,8 @@ async function loadTeam() {
     activeBox.innerHTML = "";
 
     if (waiting.length === 0) {
-      pendingBox.innerHTML = '<div class="empty">Keine offenen Registrierungen.</div>';
+      pendingBox.innerHTML =
+        '<div class="empty">Keine offenen Registrierungen.</div>';
     }
 
     waiting.forEach(p => {
@@ -130,7 +140,9 @@ async function loadTeam() {
 
       const role = document.createElement("div");
       role.className = "email";
-      role.textContent = p.role === "manager" ? "Manager" : "Mitarbeiter";
+      role.textContent = p.role === "manager"
+        ? "Manager"
+        : "Mitarbeiter";
 
       info.append(name, role);
 
@@ -144,7 +156,8 @@ async function loadTeam() {
     });
 
     if (working.length === 0) {
-      activeBox.innerHTML = '<div class="empty">Noch keine aktiven Mitarbeiter.</div>';
+      activeBox.innerHTML =
+        '<div class="empty">Noch keine aktiven Mitarbeiter.</div>';
     }
 
     working.forEach(p => {
@@ -159,7 +172,9 @@ async function loadTeam() {
 
       const role = document.createElement("div");
       role.className = "email";
-      role.textContent = p.role === "manager" ? "Manager" : "Mitarbeiter";
+      role.textContent = p.role === "manager"
+        ? "Manager"
+        : "Mitarbeiter";
 
       info.append(name, role);
       div.append(info);
@@ -196,6 +211,7 @@ createForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   createMessage.textContent = "Mitarbeiter wird erstellt...";
+  createButton.disabled = true;
 
   const firstName = document.getElementById("firstName").value.trim();
   const lastName = document.getElementById("lastName").value.trim();
@@ -203,24 +219,71 @@ createForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("newPassword").value;
 
   try {
-    const { data, error } = await supabase.functions.invoke("create-employee", {
-      body: {
-        firstName,
-        lastName,
-        email,
-        password
-      }
-    });
+    // Aktuelle Sitzung abrufen
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
 
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
+    if (sessionError) throw sessionError;
+
+    const session = sessionData.session;
+
+    if (!session?.access_token) {
+      throw new Error("Keine gültige Sitzung. Bitte neu anmelden.");
+    }
+
+    // Direkter Aufruf statt supabase.functions.invoke
+    const response = await fetch(
+      SUPABASE_URL + "/functions/v1/create-employee",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + session.access_token
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password
+        })
+      }
+    );
+
+    const responseText = await response.text();
+
+    let result;
+
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      result = { error: responseText };
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        "HTTP " + response.status + ": " +
+        (result.error || result.message || responseText || "Unbekannter Fehler")
+      );
+    }
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
 
     createMessage.textContent = "Mitarbeiter erfolgreich erstellt!";
     createForm.reset();
+
     await loadTeam();
 
   } catch (err) {
-    createMessage.textContent = "Fehler: " + (err.message || "Erstellung fehlgeschlagen");
+    console.error("Mitarbeiter-Erstellung:", err);
+
+    createMessage.textContent =
+      "Fehler: " + (err.message || "Erstellung fehlgeschlagen");
+
+  } finally {
+    createButton.disabled = false;
   }
 });
 

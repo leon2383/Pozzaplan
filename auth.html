@@ -90,57 +90,6 @@ try {
 }
 
 window.showLogin = () => {
-  document.getElementById("loginForm").style.display = "block";
-  document.getElementById("registerForm").style.display = "none";
-  document.getElementById("loginTab").classList.add("active");
-  document.getElementById("registerTab").classList.remove("active");
-  message.textContent = "";
-};
-
-window.showRegister = () => {
-  document.getElementById("loginForm").style.display = "none";
-  document.getElementById("registerForm").style.display = "block";
-  document.getElementById("registerTab").classList.add("active");
-  document.getElementById("loginTab").classList.remove("active");
-  message.textContent = "";
-};
-
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  message.textContent = "Account wird erstellt...";
-
-  const name = document.getElementById("registerName").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const password = document.getElementById("registerPassword").value;
-
-  let data, error;
-
-try {
-  const result = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { display_name: name }
-    }
-  });
-
-  data = result.data;
-  error = result.error;
-} catch (err) {
-  message.textContent = "Netzwerkfehler: " + err.message;
-  return;
-}
-
-  if (error) {
-    message.textContent = error.message;
-    return;
-  }
-
-  message.textContent = data.session
-    ? "Account erstellt. Dein Account wartet auf Freischaltung."
-    : "Registrierung erfolgreich! Bitte bestätige deine E-Mail. Danach wartet dein Account auf Freischaltung.";
-});
-
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   message.textContent = "Login wird geprüft...";
@@ -148,48 +97,34 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
 
-  let data, error;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-try {
-  const result = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { display_name: name }
+    if (error) throw error;
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("status,role")
+      .eq("id", data.user.id)
+      .single();
+
+    if (profileError) throw profileError;
+
+    if (profile.status !== "active") {
+      message.textContent = "Dein Account ist noch nicht freigeschaltet.";
+      await supabase.auth.signOut();
+      return;
     }
-  });
 
-  data = result.data;
-  error = result.error;
-} catch (err) {
-  message.textContent = "Netzwerkfehler: " + err.message;
-  return;
-}
+    message.textContent = "Login erfolgreich!";
+    window.location.href = "./index.html";
 
-  if (error) {
-  message.textContent = "Registrierungsfehler: " + error.message;
-  return;
-}
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("status,role")
-    .eq("id", data.user.id)
-    .single();
-
-  if (profileError) {
-    message.textContent = "Profil konnte nicht geladen werden.";
-    await supabase.auth.signOut();
-    return;
+  } catch (err) {
+    message.textContent = "Login-Fehler: " + err.message;
   }
-
-  if (profile.status !== "active") {
-    message.textContent = "Dein Account ist noch nicht freigeschaltet.";
-    await supabase.auth.signOut();
-    return;
-  }
-
-  window.location.href = "./index.html";
 });
 </script>
 </body>

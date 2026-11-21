@@ -44,8 +44,7 @@ button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:60
 </div>
 
 <script type="module">
-import { createClient } from
-"https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://zzryzpjoxxpzfrzzlsvs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7pFL9_R";
@@ -56,129 +55,126 @@ const pendingBox = document.getElementById("pending");
 const activeBox = document.getElementById("active");
 const message = document.getElementById("message");
 
-async function loadTeam(){
+async function loadTeam() {
+  message.textContent = "Prüfe Anmeldung...";
+
   try {
-    message.textContent="Prüfe Anmeldung...";
-  const {data:authData} = await supabase.auth.getUser();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  if(!authData.user){
-    message.textContent="Keine Sitzung erkannt. Bitte erneut anmelden.";
-    return;
-}
+    if (authError) throw authError;
 
-  const {data:me,error:meError} = await supabase
-    .from("profiles")
-    .select("role,status")
-    .eq("id",authData.user.id)
-    .single();
+    if (!authData.user) {
+      message.textContent = "Keine Sitzung erkannt.";
+      return;
+    }
 
-if(meError){
-    message.textContent="Profil-Fehler: "+meError.message;
-    return;
-}
+    const { data: me, error: meError } = await supabase
+      .from("profiles")
+      .select("role,status")
+      .eq("id", authData.user.id)
+      .single();
 
-if(!me){
-    message.textContent="Profil nicht gefunden.";
-    return;
-}
+    if (meError) throw meError;
 
-if(me.role !== "manager" || me.status !== "active"){
-    message.textContent="Kein Manager-Zugriff: "+me.role+" / "+me.status;
-    return;
-}
+    if (me.role !== "manager" || me.status !== "active") {
+      message.textContent = "Kein Manager-Zugriff.";
+      return;
+    }
 
-const {data,error} = await supabase
-    .from("profiles")
-    .select("id,display_name,role,status,created_at")
-    .order("created_at",{ascending:true});
+    message.textContent = "Lade Teamdaten...";
 
-  if(error){
-    message.textContent="Fehler: "+error.message;
-    return;
-  }
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,display_name,role,status,created_at")
+      .order("created_at", { ascending: true });
 
-  const waiting=data.filter(p=>p.status==="pending");
-  const working=data.filter(p=>p.status==="active");
+    if (error) throw error;
 
-  pendingBox.innerHTML="";
-  activeBox.innerHTML="";
+    const waiting = data.filter(p => p.status === "pending");
+    const working = data.filter(p => p.status === "active");
 
-  if(!waiting.length){
-    pendingBox.innerHTML='<div class="empty">Keine offenen Registrierungen.</div>';
-  }
+    pendingBox.innerHTML = "";
+    activeBox.innerHTML = "";
 
-  waiting.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="person";
+    if (waiting.length === 0) {
+      pendingBox.innerHTML = '<div class="empty">Keine offenen Registrierungen.</div>';
+    }
 
-    const info=document.createElement("div");
-    const name=document.createElement("div");
-    name.className="name";
-    name.textContent=p.display_name || "Unbekannt";
+    waiting.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "person";
 
-    const email=document.createElement("div");
-    email.className="email";
-    email.textContent=p.role==="manager"?"Manager":"Mitarbeiter";
+      const info = document.createElement("div");
 
-    info.append(name,email);
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = p.display_name || "Unbekannt";
 
-    const btn=document.createElement("button");
-    btn.className="approve";
-    btn.textContent="Freischalten";
-    btn.onclick=()=>approve(p.id);
+      const role = document.createElement("div");
+      role.className = "email";
+      role.textContent = p.role === "manager" ? "Manager" : "Mitarbeiter";
 
-    div.append(info,btn);
-    pendingBox.append(div);
-  });
+      info.append(name, role);
 
-  if(!working.length){
-    activeBox.innerHTML='<div class="empty">Noch keine aktiven Mitarbeiter.</div>';
-  }
+      const btn = document.createElement("button");
+      btn.className = "approve";
+      btn.textContent = "Freischalten";
+      btn.onclick = () => approve(p.id);
 
-  working.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="person";
+      div.append(info, btn);
+      pendingBox.append(div);
+    });
 
-    const info=document.createElement("div");
-    const name=document.createElement("div");
-    name.className="name";
-    name.textContent=p.display_name || "Unbekannt";
+    if (working.length === 0) {
+      activeBox.innerHTML = '<div class="empty">Noch keine aktiven Mitarbeiter.</div>';
+    }
 
-    const role=document.createElement("div");
-    role.className="email";
-    role.textContent=p.role==="manager"?"Manager":"Mitarbeiter";
+    working.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "person";
 
-    info.append(name,role);
-    div.append(info);
-    activeBox.append(div);
-  });
-}
+      const info = document.createElement("div");
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = p.display_name || "Unbekannt";
+
+      const role = document.createElement("div");
+      role.className = "email";
+      role.textContent = p.role === "manager" ? "Manager" : "Mitarbeiter";
+
+      info.append(name, role);
+      div.append(info);
+      activeBox.append(div);
+    });
+
+    message.textContent = "Team erfolgreich geladen.";
+
   } catch (err) {
-    message.textContent="JavaScript-Fehler: "+err.message;
+    message.textContent = "Fehler: " + err.message;
   }
 }
-async function approve(id){
-  message.textContent="Freischaltung läuft...";
 
-  const {error}=await supabase
-    .from("profiles")
-    .update({status:"active"})
-    .eq("id",id);
+async function approve(id) {
+  message.textContent = "Freischaltung läuft...";
 
-  if(error){
-    message.textContent="Fehler: "+error.message;
-    return;
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: "active" })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    message.textContent = "Mitarbeiter freigeschaltet!";
+    await loadTeam();
+
+  } catch (err) {
+    message.textContent = "Fehler: " + err.message;
   }
-
-  message.textContent="Mitarbeiter freigeschaltet!";
-  await loadTeam();
 }
 
-loadTeam(if(!authData.user){
-    message.textContent="Keine Sitzung erkannt.";
-    return;
-});
-message.textContent = "TEST ERREICHT";
+loadTeam();
 </script>
 </body>
 </html>

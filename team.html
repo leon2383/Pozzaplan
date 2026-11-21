@@ -60,9 +60,9 @@ async function loadTeam(){
   const {data:authData} = await supabase.auth.getUser();
 
   if(!authData.user){
-    location.href="./auth.html";
+    message.textContent="Keine Sitzung erkannt. Bitte erneut anmelden.";
     return;
-  }
+}
 
   const {data:me,error:meError} = await supabase
     .from("profiles")

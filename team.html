@@ -70,10 +70,20 @@ async function loadTeam(){
     .eq("id",authData.user.id)
     .single();
 
-  if(meError || !me || me.role !== "manager" || me.status !== "active"){
-    message.textContent="Kein Manager-Zugriff.";
+if(meError){
+    message.textContent="Profil-Fehler: "+meError.message;
     return;
-  }
+}
+
+if(!me){
+    message.textContent="Profil nicht gefunden.";
+    return;
+}
+
+if(me.role !== "manager" || me.status !== "active"){
+    message.textContent="Kein Manager-Zugriff: "+me.role+" / "+me.status;
+    return;
+}
 
   const {data,error} = await supabase
     .from("profiles")

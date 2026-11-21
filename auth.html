@@ -91,6 +91,7 @@ try {
 
 window.showLogin = () => {
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
+message.textContent = "LOGIN-KLICK ERKANNT"; 
   e.preventDefault();
   message.textContent = "Login wird geprüft...";
 

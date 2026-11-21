@@ -169,7 +169,10 @@ async function approve(id){
   await loadTeam();
 }
 
-message.textContent = "TEST – NEUE TEAM-DATEI";
+loadTeam(if(!authData.user){
+    message.textContent="Keine Sitzung erkannt.";
+    return;
+});
 </script>
 </body>
 </html>

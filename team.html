@@ -21,6 +21,8 @@ button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:60
 .back{background:#253446;color:white;margin-bottom:20px}
 .status{color:#98a6b8;font-size:14px}
 .empty{color:#98a6b8;padding:10px 0}
+input{width:100%;padding:12px;margin:7px 0 12px;border-radius:10px;border:1px solid #34465a;background:#0b1119;color:white;font:inherit}
+.create{width:100%;background:#31c48d;color:#071b14;margin-top:5px}
 </style>
 </head>
 <body>
@@ -29,6 +31,20 @@ button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:60
 
 <h1>👥 Mitarbeiterverwaltung</h1>
 <div class="sub">PozzaPlan – Team verwalten</div>
+
+<div class="card">
+<h3>➕ Mitarbeiter erstellen</h3>
+
+<form id="createForm">
+<input id="firstName" placeholder="Vorname" required>
+<input id="lastName" placeholder="Nachname" required>
+<input id="newEmail" type="email" placeholder="E-Mail-Adresse" required>
+<input id="newPassword" type="password" placeholder="Temporäres Passwort (mind. 8 Zeichen)" minlength="8" required>
+
+<button class="create" type="submit">Mitarbeiter erstellen</button>
+</form>
+<div id="createMessage" class="status"></div>
+</div>
 
 <div class="card">
 <h3>⏳ Offene Registrierungen</h3>
@@ -47,13 +63,15 @@ button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:60
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://zzryzpjoxxpzfrzzlsvs.supabase.co";
-const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7pFL9_R";
+const SUPABASE_KEY = "sb_publishable_SQgTXMfuzKWQ55_nvTNRaA_Z7PFL9_R";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const pendingBox = document.getElementById("pending");
 const activeBox = document.getElementById("active");
 const message = document.getElementById("message");
+const createMessage = document.getElementById("createMessage");
+const createForm = document.getElementById("createForm");
 
 async function loadTeam() {
   message.textContent = "Prüfe Anmeldung...";
@@ -173,6 +191,38 @@ async function approve(id) {
     message.textContent = "Fehler: " + err.message;
   }
 }
+
+createForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  createMessage.textContent = "Mitarbeiter wird erstellt...";
+
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const password = document.getElementById("newPassword").value;
+
+  try {
+    const { data, error } = await supabase.functions.invoke("create-employee", {
+      body: {
+        firstName,
+        lastName,
+        email,
+        password
+      }
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+
+    createMessage.textContent = "Mitarbeiter erfolgreich erstellt!";
+    createForm.reset();
+    await loadTeam();
+
+  } catch (err) {
+    createMessage.textContent = "Fehler: " + (err.message || "Erstellung fehlgeschlagen");
+  }
+});
 
 loadTeam();
 </script>

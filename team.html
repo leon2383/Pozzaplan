@@ -85,9 +85,9 @@ if(me.role !== "manager" || me.status !== "active"){
     return;
 }
 
-  const {data,error} = await supabase
+const {data,error} = await supabase
     .from("profiles")
-    .select("id,display_name,role,status")
+    .select("id,display_name,role,status,created_at")
     .order("created_at",{ascending:true});
 
   if(error){
